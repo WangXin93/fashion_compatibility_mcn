@@ -14,7 +14,21 @@ from model import CompatModel
 from utils import AverageMeter, BestSaver, config_logging, prepare_dataloaders
 
 # Leave a comment for this training, and it will be used for name suffix of log and saved model
-comment = '_'.join(sys.argv[1:])
+import argparse
+parser = argparse.ArgumentParser(description='Fashion Compatibility Training.')
+parser.add_argument('--vse_off', action="store_true")
+parser.add_argument('--pe_off', action="store_true")
+parser.add_argument('--mlp_layers', type=int, default=2)
+parser.add_argument('--conv_feats', type=str, default="1234")
+parser.add_argument('--comment', type=str, default="")
+args = parser.parse_args()
+
+print(args)
+comment = args.comment
+vse_off = args.vse_off
+pe_off = args.pe_off
+mlp_layers = args.mlp_layers
+conv_feats = args.conv_feats
 
 # Logger
 config_logging(comment)
@@ -28,7 +42,8 @@ train_dataset, train_loader, val_dataset, val_loader, test_dataset, test_loader 
 device = torch.device("cuda:0")
 
 # Model
-model = CompatModel(embed_size=1000, need_rep=True, vocabulary=len(train_dataset.vocabulary))
+model = CompatModel(embed_size=1000, need_rep=True, vocabulary=len(train_dataset.vocabulary),
+                    vse_off=vse_off, pe_off=pe_off, mlp_layers=mlp_layers, conv_feats=conv_feats)
 
 # Train process
 def train(model, device, train_loader, val_loader, comment):

@@ -11,6 +11,23 @@ import resnet
 from utils import AverageMeter, BestSaver, config_logging, prepare_dataloaders
 from model import CompatModel
 
+# Leave a comment for this training, and it will be used for name suffix of log and saved model
+import argparse
+parser = argparse.ArgumentParser(description='Fashion Compatibility Evaluation.')
+parser.add_argument('--vse_off', action="store_true")
+parser.add_argument('--pe_off', action="store_true")
+parser.add_argument('--mlp_layers', type=int, default=2)
+parser.add_argument('--conv_feats', type=str, default="1234")
+parser.add_argument('--model_path', type=str, default="./model_train_relation_vse_type_cond_scales.pth")
+args = parser.parse_args()
+
+print(args)
+vse_off = args.vse_off
+pe_off = args.pe_off
+mlp_layers = args.mlp_layers
+conv_feats = args.conv_feats
+model_path = args.model_path
+
 # Dataloader
 train_dataset, train_loader, val_dataset, val_loader, test_dataset, test_loader = (
     prepare_dataloaders()
@@ -18,8 +35,9 @@ train_dataset, train_loader, val_dataset, val_loader, test_dataset, test_loader 
 
 # Load pretrained weights
 device = torch.device("cuda:0")
-model = CompatModel(embed_size=1000, need_rep=True, vocabulary=len(train_dataset.vocabulary)).to(device)
-model.load_state_dict(torch.load("./model_train_relation_vse_type_cond_scales.pth"))
+model = CompatModel(embed_size=1000, need_rep=True, vocabulary=len(train_dataset.vocabulary),
+                    vse_off=vse_off, pe_off=pe_off, mlp_layers=mlp_layers, conv_feats=conv_feats).to(device)
+model.load_state_dict(torch.load(model_path))
 criterion = nn.BCELoss()
 
 # Compatibility AUC test
@@ -28,7 +46,7 @@ total_loss = 0
 outputs = []
 targets = []
 for batch_num, batch in enumerate(test_loader, 1):
-    print("\r#{}".format(batch_num), end="", flush=True)
+    print("\r#{}/{}".format(batch_num, len(test_loader)), end="", flush=True)
     lengths, images, names, offsets, set_ids, labels, is_compat = batch
     images = images.to(device)
     target = is_compat.float().to(device)
@@ -49,7 +67,7 @@ print("AUC: {:.4f}".format(metrics.roc_auc_score(targets, outputs)))
 # Fill in the blank evaluation
 is_correct = []
 for i in range(len(test_dataset)):
-    print("\r#{}".format(i), end="", flush=True)
+    print("\r#{}/{}".format(i, len(test_dataset)), end="", flush=True)
     items, labels, question_part, question_id, options, option_labels = test_dataset.get_fitb_quesiton(
         i
     )

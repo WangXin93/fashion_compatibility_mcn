@@ -9,9 +9,17 @@ import torchvision.models as models
 
 from resnet import resnet50
 
-
 class CompatModel(nn.Module):
-    def __init__(self, embed_size=1000, need_rep=False, vocabulary=None):
+    def __init__(
+            self, 
+            embed_size=1000, 
+            need_rep=False, 
+            vocabulary=None,
+            vse_off=False,
+            pe_off=False,
+            mlp_layers=2,
+            conv_feats="1234",
+        ):
         """The Multi-Layered Comparison Network (MCN) for outfit compatibility
         prediction and diagnosis.
 
@@ -21,24 +29,42 @@ class CompatModel(nn.Module):
                 layer, whose size is 2048. This representation can be used for
                 compute the Visual Sementic Embedding (VSE) loss.
             vocabulary: the counts of words in the polyvore dataset.
+            vse_off: whether use visual semantic embedding.
+            pe_off: whether use projected embedding.
+            mlp_layers: number of mlp layers used in the last predictor part.
+            conv_feats: decide which layer of conv features are used for comparision.
         """
         super(CompatModel, self).__init__()
+        self.vse_off = vse_off
+        self.pe_off = pe_off
+        self.mlp_layers = mlp_layers
+        self.conv_feats = conv_feats
+
         cnn = resnet50(pretrained=True, need_rep=need_rep)
         cnn.fc = nn.Linear(cnn.fc.in_features, embed_size)
         self.cnn = cnn
         self.need_rep = need_rep
-        self.bn = nn.BatchNorm1d(15*4)  # 5x5 relationship matrix have 25 elements
-        self.fc1 = nn.Linear(15*4, 15*4)
-        self.fc2 = nn.Linear(15*4, 1)
+        self.num_rela = 15 * len(conv_feats)
+        self.bn = nn.BatchNorm1d(self.num_rela)  # 5x5 relationship matrix have 25 elements
+
+        # Define predictor part
+        if self.mlp_layers > 0:
+            predictor = []
+            for _ in range(self.mlp_layers-1):
+                linear = nn.Linear(self.num_rela, self.num_rela)
+                nn.init.xavier_uniform_(linear.weight)
+                nn.init.constant_(linear.bias, 0)
+                predictor.append(linear)
+                predictor.append(nn.ReLU())
+            linear = nn.Linear(self.num_rela, 1)
+            nn.init.xavier_uniform_(linear.weight)
+            nn.init.constant_(linear.bias, 0)
+            predictor.append(linear)
+            self.predictor = nn.Sequential(*predictor)
         self.sigmoid = nn.Sigmoid()
 
-        # Initialize the compatibility predictor, which is a 2-layered MLP
         nn.init.xavier_uniform_(cnn.fc.weight)
         nn.init.constant_(cnn.fc.bias, 0)
-        nn.init.xavier_uniform_(self.fc1.weight)
-        nn.init.constant_(self.fc1.bias, 0)
-        nn.init.xavier_uniform_(self.fc2.weight)
-        nn.init.constant_(self.fc2.bias, 0)
 
         # Type specified masks
         # l1, l2, l3 is the masks for feature maps for the beginning layers
@@ -77,8 +103,14 @@ class CompatModel(nn.Module):
         else:
             out, features, tmasks = self._compute_score(images)
 
-        vse_loss = self._compute_vse_loss(names, rep)
-        tmasks_loss, features_loss = self._compute_type_repr_loss(tmasks, features)
+        if self.vse_off:
+            vse_loss = torch.tensor(0.)
+        else:
+            vse_loss = self._compute_vse_loss(names, rep)
+        if self.pe_off:
+            tmasks_loss, features_loss = torch.tensor(0.), torch.tensor(0.)
+        else:
+            tmasks_loss, features_loss = self._compute_type_repr_loss(tmasks, features)
 
         return out, vse_loss, tmasks_loss, features_loss
 
@@ -159,20 +191,37 @@ class CompatModel(nn.Module):
         features = features.reshape(batch_size, item_num, -1)  # (32, 5, 1000)
         masks = F.relu(self.masks.weight)
         # Comparison matrix
-        for mi, (i, j) in enumerate(itertools.combinations_with_replacement([0,1,2,3,4], 2)):
-            left = F.normalize(masks[mi] * features[:, i:i+1, :], dim=-1) # (32, 1, 1000)
-            right = F.normalize(masks[mi] * features[:, j:j+1, :], dim=-1)
-            rela = torch.matmul(left, right.transpose(1, 2)).squeeze() # (32)
-            relations.append(rela)
+        if "4" in self.conv_feats:
+            for mi, (i, j) in enumerate(itertools.combinations_with_replacement([0,1,2,3,4], 2)):
+                if self.pe_off:
+                    left = F.normalize(features[:, i:i+1, :], dim=-1) # (32, 1, 1000)
+                    right = F.normalize(features[:, j:j+1, :], dim=-1)
+                else:
+                    left = F.normalize(masks[mi] * features[:, i:i+1, :], dim=-1) # (32, 1, 1000)
+                    right = F.normalize(masks[mi] * features[:, j:j+1, :], dim=-1)
+                rela = torch.matmul(left, right.transpose(1, 2)).squeeze() # (32)
+                relations.append(rela)
 
         # Comparision at Multi-Layered representations
-        for rep_li, masks_li in zip([rep_l1, rep_l2, rep_l3], [self.masks_l1, self.masks_l2, self.masks_l3]):
+        rep_list = []
+        masks_list = []
+        if "1" in self.conv_feats:
+            rep_list.append(rep_l1); masks_list.append(self.masks_l1)
+        if "2" in self.conv_feats:
+            rep_list.append(rep_l2); masks_list.append(self.masks_l2)
+        if "3" in self.conv_feats:
+            rep_list.append(rep_l3); masks_list.append(self.masks_l3)
+        for rep_li, masks_li in zip(rep_list, masks_list):
             rep_li = self.ada_avgpool2d(rep_li).squeeze().reshape(batch_size, item_num, -1)
             masks_li = F.relu(masks_li.weight)
             # Enumerate all pairwise combination among the outfit then compare their features
             for mi, (i, j) in enumerate(itertools.combinations_with_replacement([0,1,2,3,4], 2)):
-                left = F.normalize(masks_li[mi] * rep_li[:, i:i+1, :], dim=-1) # (32, 1, 1000)
-                right = F.normalize(masks_li[mi] * rep_li[:, j:j+1, :], dim=-1)
+                if self.pe_off:
+                    left = F.normalize(masks_li[mi] * rep_li[:, i:i+1, :], dim=-1) # (32, 1, 1000)
+                    right = F.normalize(masks_li[mi] * rep_li[:, j:j+1, :], dim=-1)
+                else:
+                    left = F.normalize(masks_li[mi] * rep_li[:, i:i+1, :], dim=-1) # (32, 1, 1000)
+                    right = F.normalize(masks_li[mi] * rep_li[:, j:j+1, :], dim=-1)
                 rela = torch.matmul(left, right.transpose(1, 2)).squeeze() # (32)
                 relations.append(rela)
 
@@ -183,8 +232,10 @@ class CompatModel(nn.Module):
         relations = self.bn(relations)
 
         # Predictor
-        out = F.relu(self.fc1(relations))
-        out = self.fc2(out)
+        if self.mlp_layers == 0:
+            out = relations.mean(dim=-1, keepdim=True)
+        else:
+            out = self.predictor(relations)
 
         if activate:
             out = self.sigmoid(out)
