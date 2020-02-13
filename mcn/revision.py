@@ -82,6 +82,6 @@ if __name__ == "__main__":
     result, order = item_diagnosis(relation, select)
     print("Predicted Score: {:.4f}\nProblem value of each item: {}\nOrder: {}".format(out, result, order))
 
-    print("\nStep 3: substitute the problem items for revision...")
+    print("\nStep 3: substitute the problem items for revision, it takes a while to search...")
     best_score, best_img_path = retrieve_sub(x, select, order)
     print("="*80)

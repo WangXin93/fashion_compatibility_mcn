@@ -67,7 +67,7 @@ def defect_detect(img, model, normalize=True):
         relation = grad_in[1].detach()
 
     for name, module in model.named_modules():
-        if name == 'fc1':
+        if name == 'predictor.0':
             module.register_backward_hook(func_r)
 
     # Forward
