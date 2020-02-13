@@ -67,7 +67,13 @@ if __name__ == "__main__":
     model.eval()
     
     print("="*80)
+    # Comment different line to choose different outfit as example.
     ID = ['178118160_1', 'bottom_mean', '199285568_4', '111355382_5', '209432387_4']
+    # ID = ['204421067_1', 'bottom_mean', '202412456_3', '214716404_4', '187592500_5']
+    # ID = ['140106066_1', '139731278_2', '215327132_4', 'bag_mean', '211697041_4']
+    # ID = ['108112189_1', '216678271_2', '200786021_3', 'bag_mean', 'accessory_mean']
+    # ID = ['127389151_1', 'bottom_mean', 'shoe_mean', '190117110_4', '171755122_4']
+    # ID = ['187950801_1', '198450014_1', '129931699_5', '136842112_3', 'accessory_mean']
     x = loadimg_from_id(ID).to(device)
     # kick out the mean images for padding the sequence when making visualization
     select = [i for i, l in enumerate(ID) if 'mean' not in l]
