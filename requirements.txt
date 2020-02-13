@@ -1,0 +1,5 @@
+torch==1.0.1
+torchvision==0.2.1
+networkx==2.4
+opencv-python==4.2.0.32
+matplotlib==2.2.2
