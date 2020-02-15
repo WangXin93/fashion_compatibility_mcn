@@ -68,7 +68,7 @@ Pretrained model weights can be found in the links. The train, validation and te
 | Self-attention                                               |   79.65   |   48.60   |
 | [BiLSTM](https://drive.google.com/open?id=1WaUP0X-ytZ05HYzeHmdBSzT9gcjF1c46) |   74.82   |   46.02   |
 | [CSN](https://drive.google.com/open?id=1EYwtJBRMFxRDzQs7JNYQhp2TpRF2fw9r) |   84.90   |   57.06   |
-| [Ours](https://drive.google.com/open?id=1--CfX5LMTxrdxSL_xkDb6MBaNRcAXeXg) | **91.90** | **64.35** |
+| [Ours](https://drive.google.com/open?id=1WAErKHDmDfamZQt90wAOC5Db04euIeIP) | **91.90** | **64.35** |
 
 ## Cite
 
