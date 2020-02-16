@@ -41,7 +41,7 @@ def defect_detect(img, model, normalize=True):
         relation = grad_in[1].detach()
 
     for name, module in model.named_modules():
-        if name == 'fc1':
+        if name == 'predictor.0':
             module.register_backward_hook(func_r)
     # Forward
     out  = model._compute_score(img)
@@ -99,6 +99,7 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 root = "/home/wangx/fashion_compatibility_mcn/data"
+root = "/mnt/iusers01/fatpou01/matsci01/t80083xw/scratch/fashion_compatibility_mcn/data"
 img_root = os.path.join(root, "images")
 json_file = os.path.join(root, "test_no_dup_with_category_3more_name.json")
 
@@ -332,7 +333,7 @@ def update_output(n_clicks, top, bottom, shoe, bag, accessory):
         result, order = item_diagnosis(relation, select=[0, 1, 2, 3, 4])
         best_score, best_img_path = retrieve_sub(img_tensor, [0, 1, 2, 3, 4], order)
 
-        out = [html.H4(children="Result"), html.H4(children="Score: {:.4f}".format(score)), html.H4(children="Revised Score: {:.4f}".format(best_score))]
+        out = [html.H4(children="Revised Outfit"), html.H4(children="Score: {:.4f}".format(score)), html.H4(children="Revised Score: {:.4f}".format(best_score))]
 
         for part in ["top", "bottom", "shoe", "bag", "accessory"]:
             if part in best_img_path.keys():
@@ -417,5 +418,5 @@ def base64_to_image(base64_str):
     return img
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(debug=True, host='0.0.0.0')
 
