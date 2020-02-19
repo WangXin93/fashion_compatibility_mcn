@@ -9,6 +9,8 @@ Implementation of the method proposed in the paper:
 by Xin Wang, Bo Wu, Yueqi Zhong
 Published at ACM MM 2019 in Nice, France.
 
+[[Paper](https://dl.acm.org/doi/10.1145/3343031.3350909)] [[Arxiv](https://arxiv.org/abs/1907.11496)] [[Demo](https://outfit-diagnosis.herokuapp.com)]
+
 ## Contents of this repository
 
 * [mcn](./mcn): Main program source code
