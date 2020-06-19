@@ -23,9 +23,12 @@ Published at ACM MM 2019 in Nice, France.
 Ubuntu 16.04, NVIDIA GTX 1080Ti (for batch size 16), python >= 3.5.2
 
 ```
-torch>=0.4.1
-torchvision
-networkx
+torch==1.0.1
+torchvision==0.2.1
+networkx==2.4
+opencv-python==4.2.0.32
+matplotlib==2.2.2
+scikit-learn==0.21.2
 ```
 
 ## Usage
