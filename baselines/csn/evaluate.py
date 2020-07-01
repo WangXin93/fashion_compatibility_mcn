@@ -16,6 +16,12 @@ from polyvore_dataset import CategoryDataset, TripletDataset
 from Resnet_18 import resnet18
 
 
+# Hyperparameters
+img_size = 112
+emb_size = 64
+device = torch.device("cuda")
+
+
 # Helper functions
 def test_compatibility_auc(test_auc_dataset, embeddingnet):
     """ Compute AUC of classifying compatibile and incompatible outfits
@@ -133,11 +139,6 @@ def calc_outfit_score(images, labels, conditions, embeddingnet):
 
 
 def main():
-    # Hyperparameters
-    img_size = 112
-    emb_size = 64
-    device = torch.device("cuda")
-
     # Dataloader
     transform = torchvision.transforms.Compose(
         [
