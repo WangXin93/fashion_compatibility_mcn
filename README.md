@@ -1,6 +1,7 @@
 # Outfit Compatibility Prediction and Diagnosis with Multi-Layered Comparison Network
 
 ![diagnosis](./exp/diagnosis.png)
+![demo1](./exp/demo1.gif)
 
 Implementation of the method proposed in the paper: 
 
