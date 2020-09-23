@@ -1,7 +1,13 @@
 # Outfit Compatibility Prediction and Diagnosis with Multi-Layered Comparison Network
 
-![diagnosis](./exp/diagnosis.png)
-![demo1](./exp/demo1.gif)
+
+<div align=center>
+<img src="./exp/diagnosis.png" width="80%" height="80%" />
+</div>
+
+<div align=center>
+<img src="./exp/demo1.gif" width="80%" height="80%" />
+</div>
 
 Paper: 
 **Outfit Compatibility Prediction and Diagnosis with Multi-Layered Comparison Network**
