@@ -3,11 +3,10 @@
 ![diagnosis](./exp/diagnosis.png)
 ![demo1](./exp/demo1.gif)
 
-Implementation of the method proposed in the paper: 
-
+Paper: 
 **Outfit Compatibility Prediction and Diagnosis with Multi-Layered Comparison Network**
 
-by Xin Wang, Bo Wu, Yueqi Zhong
+by Xin Wang, Bo Wu, Yueqi Zhong. 
 Published at ACM MM 2019 in Nice, France.
 
 [[Paper](https://dl.acm.org/doi/10.1145/3343031.3350909)] [[Arxiv](https://arxiv.org/abs/1907.11496)] [[Demo](https://outfit-diagnosis.herokuapp.com)]
