@@ -83,7 +83,7 @@ Pretrained model weights can be found in the links. The train, validation and te
 
 ## Cite
 
-Please cite our paper if you use this code in your own work:
+Please cite our paper if you use or refer this code:
 
 ```
 @inproceedings{wang2019diagnosis,
