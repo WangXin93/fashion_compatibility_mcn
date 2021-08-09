@@ -39,7 +39,7 @@ scikit-learn==0.21.2
 
 ## Usage
 
-1. Download the original [Polyvore]() dataset, then unzip the file and put the `image` directory into `data` folders (or you can create a soft link for it).
+1. Download the original [Polyvore](https://github.com/xthan/polyvore/) dataset, then unzip the file and put the `image` directory into `data` folders (or you can create a soft link for it).
 
 2. Train
 
@@ -80,6 +80,12 @@ Pretrained model weights can be found in the links. The train, validation and te
 | [BiLSTM](https://drive.google.com/open?id=1WaUP0X-ytZ05HYzeHmdBSzT9gcjF1c46) |   74.82   |   46.02   |
 | [CSN](https://drive.google.com/open?id=1EYwtJBRMFxRDzQs7JNYQhp2TpRF2fw9r) |   84.90   |   57.06   |
 | [Ours](https://drive.google.com/open?id=1WAErKHDmDfamZQt90wAOC5Db04euIeIP) | **91.90** | **64.35** |
+
+## Demo
+
+A demo application is in the [app](./app) directioy. You can run it locally by go to [app](./app) directory then use command ``python main.py``.
+
+More guide can be found in [here](./app/README.md).
 
 ## Cite
 
