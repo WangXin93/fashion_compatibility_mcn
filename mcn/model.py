@@ -8,6 +8,7 @@ import torch.nn.utils.rnn as rnn_utils
 import torchvision.models as models
 
 from resnet import resnet50
+from resnet import ffc_resnet50
 
 class CompatModel(nn.Module):
     def __init__(
@@ -40,7 +41,7 @@ class CompatModel(nn.Module):
         self.mlp_layers = mlp_layers
         self.conv_feats = conv_feats
 
-        cnn = resnet50(pretrained=True, need_rep=need_rep)
+        cnn = ffc_resnet50(pretrained=False, need_rep=need_rep)
         cnn.fc = nn.Linear(cnn.fc.in_features, embed_size)
         self.cnn = cnn
         self.need_rep = need_rep
