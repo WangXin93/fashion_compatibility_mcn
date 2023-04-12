@@ -13,6 +13,8 @@ from torchvision import models
 from model import CompatModel
 from utils import AverageMeter, BestSaver, config_logging, prepare_dataloaders
 
+# torch.cuda.empty_cache()
+
 # Leave a comment for this training, and it will be used for name suffix of log and saved model
 import argparse
 parser = argparse.ArgumentParser(description='Fashion Compatibility Training.')
@@ -52,7 +54,7 @@ def train(model, device, train_loader, val_loader, comment):
     optimizer = torch.optim.SGD(model.parameters(), lr=1e-2, momentum=0.9)
     scheduler = lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.5)
     saver = BestSaver(comment)
-    epochs = 50
+    epochs = 5
     for epoch in range(1, epochs + 1):
         logging.info("Train Phase, Epoch: {}".format(epoch))
         scheduler.step()

@@ -42,7 +42,7 @@ class BestSaver(object):
     >>> saver.save(0.6, model.state_dict())
     """
     def __init__(self, comment=None):
-        # Get current executing script name
+        # Get current executing script name 
         import __main__, os
         exe_fname=os.path.basename(__main__.__file__)
         save_path = "model_{}".format(exe_fname.split(".")[0])

@@ -26,3 +26,6 @@ venv.bak/
 
 # pickle
 *.pkl
+
+images/
+data/

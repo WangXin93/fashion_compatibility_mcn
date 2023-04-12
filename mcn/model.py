@@ -8,6 +8,7 @@ import torch.nn.utils.rnn as rnn_utils
 import torchvision.models as models
 
 from resnet import resnet50
+from resnet import ffc_resnet50
 
 class CompatModel(nn.Module):
     def __init__(
@@ -40,7 +41,7 @@ class CompatModel(nn.Module):
         self.mlp_layers = mlp_layers
         self.conv_feats = conv_feats
 
-        cnn = resnet50(pretrained=True, need_rep=need_rep)
+        cnn = ffc_resnet50(pretrained=False, need_rep=need_rep)
         cnn.fc = nn.Linear(cnn.fc.in_features, embed_size)
         self.cnn = cnn
         self.need_rep = need_rep
@@ -170,6 +171,7 @@ class CompatModel(nn.Module):
         )
         return tmasks_loss, features_loss
 
+    # this is the method we make modifications in for the project
     def _compute_score(self, images, activate=True):
         """Extract feature vectors from input images.
 
@@ -190,6 +192,7 @@ class CompatModel(nn.Module):
         relations = []
         features = features.reshape(batch_size, item_num, -1)  # (32, 5, 1000)
         masks = F.relu(self.masks.weight)
+
         # Comparison matrix
         if "4" in self.conv_feats:
             for mi, (i, j) in enumerate(itertools.combinations_with_replacement([0,1,2,3,4], 2)):
@@ -205,15 +208,24 @@ class CompatModel(nn.Module):
         # Comparision at Multi-Layered representations
         rep_list = []
         masks_list = []
+
         if "1" in self.conv_feats:
-            rep_list.append(rep_l1); masks_list.append(self.masks_l1)
+            rep_list.append(rep_l1)
+            masks_list.append(self.masks_l1)
         if "2" in self.conv_feats:
-            rep_list.append(rep_l2); masks_list.append(self.masks_l2)
+            rep_list.append(rep_l2)
+            masks_list.append(self.masks_l2)
         if "3" in self.conv_feats:
-            rep_list.append(rep_l3); masks_list.append(self.masks_l3)
+            rep_list.append(rep_l3)
+            masks_list.append(self.masks_l3)
+
         for rep_li, masks_li in zip(rep_list, masks_list):
+
+            # global average pooling after each layer
+            # we can add/remove the number of layers by changing conv_feats
             rep_li = self.ada_avgpool2d(rep_li).squeeze().reshape(batch_size, item_num, -1)
             masks_li = F.relu(masks_li.weight)
+            
             # Enumerate all pairwise combination among the outfit then compare their features
             for mi, (i, j) in enumerate(itertools.combinations_with_replacement([0,1,2,3,4], 2)):
                 if self.pe_off:
