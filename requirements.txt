@@ -1,6 +1,6 @@
 torch==1.0.1
 torchvision==0.2.1
 networkx==2.4
-opencv-python==4.2.0.32
+opencv-python==4.8.1.78
 matplotlib==2.2.2
 scikit-learn==0.21.2
